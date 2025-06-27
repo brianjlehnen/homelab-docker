@@ -10,7 +10,7 @@ services:
       TZ: America/Chicago
       PUID: 1000
       PGID: 1000
-      APP_KEY: base64:qpAXK8UXx9GWzOzF6cEV6Lqp1i0BjKdW8QkYXktcg7c=
+      APP_KEY: ${SPEEDTEST_APP_KEY}
       DB_CONNECTION: sqlite
       SPEEDTEST_SCHEDULE: 0 */6 * * *  # Every 6 hours
       SPEEDTEST_SERVERS:           # Auto-select best servers
