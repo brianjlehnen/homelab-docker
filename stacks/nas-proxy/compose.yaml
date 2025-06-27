@@ -1,0 +1,18 @@
+services:
+  nas-proxy:
+    image: traefik/whoami # dummy container
+    container_name: nas-proxy
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nas.rule=Host(`nas.lab1830.com`)"
+      - "traefik.http.routers.nas.entrypoints=websecure"
+      - "traefik.http.routers.nas.tls=true"
+      - "traefik.http.routers.nas.service=nas-service"
+      - "traefik.http.services.nas-service.loadbalancer.server.url=http://192.168.4.159:5001"
+
+networks:
+  web:
+    external: true

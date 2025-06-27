@@ -1,0 +1,16 @@
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:2025.5.0
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - /home/blehnen/.cloudflared:/etc/cloudflared:ro
+    networks:
+      - web
+    environment:
+      - TZ=America/Chicago
+
+networks:
+  web:
+    external: true

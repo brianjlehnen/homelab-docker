@@ -1,0 +1,39 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
+    security_opt:
+      - no-new-privileges:true
+    # Remove the entire command section - let traefik.yml handle config
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config:/etc/traefik/config
+      - ./certs:/etc/traefik/config/dynamic/certs
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      # Dashboard
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.lab1830.com`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencrypt"
+      # HTTP → HTTPS Redirect
+      - "traefik.http.routers.http-catchall-redirect.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall-redirect.entrypoints=web"
+      - "traefik.http.routers.http-catchall-redirect.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
+
+networks:
+  web:
+    external: true

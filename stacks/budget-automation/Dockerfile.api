@@ -1,0 +1,21 @@
+# Use Python 3.11 slim image
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy the API script
+COPY budget_api.py .
+
+# Make the script executable
+RUN chmod +x budget_api.py
+
+# Expose port
+EXPOSE 8000
+
+# Set timezone
+ENV TZ=America/Chicago
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Run the API server
+CMD ["python", "budget_api.py"]

@@ -1,0 +1,31 @@
+services:
+  smokeping:
+    image: linuxserver/smokeping:2.9.0
+    container_name: smokeping
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - /home/blehnen/docker/appdata/smokeping/config:/config
+      - /home/blehnen/docker/appdata/smokeping/data:/data
+    networks:
+      - web
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.smokeping.rule=Host(`smokeping.lab1830.com`)
+      - traefik.http.routers.smokeping.entrypoints=websecure
+      - traefik.http.routers.smokeping.tls=true
+      - traefik.http.services.smokeping.loadbalancer.server.port=80
+      - traefik.http.routers.smokeping.tls.certresolver=letsencrypt
+      - traefik.http.middlewares.smokeping-redirect.redirectregex.regex=^https://smokeping.lab1830.com/?$$
+      - traefik.http.middlewares.smokeping-redirect.redirectregex.replacement=https://smokeping.lab1830.com/smokeping/
+      - traefik.http.middlewares.smokeping-headers.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.routers.smokeping.middlewares=smokeping-redirect,smokeping-headers
+
+networks:
+  web:
+    external: true

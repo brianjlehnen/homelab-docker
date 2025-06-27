@@ -1,0 +1,9 @@
+appdata/
+secrets/
+*.env
+*.log
+**/acme.json
+**/certs/
+**/*.key
+**/*.crt
+backup/

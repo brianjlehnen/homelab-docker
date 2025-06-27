@@ -1,0 +1,28 @@
+services:
+  docker-gc:
+    image: clockworksoul/docker-gc-cron:latest
+    container_name: docker-gc
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - socket_proxy
+    volumes:
+      # Exclude list for images/containers
+      - /home/blehnen/docker/appdata/docker-gc/docker-gc-exclude:/etc/docker-gc-exclude
+    environment:
+      TZ: America/Chicago  # Or use ${TZ} if defined in .env
+      DOCKER_HOST: tcp://socket-proxy:2375
+      CRON: "0 0 0 * * ?"            # Every day at midnight
+      FORCE_IMAGE_REMOVAL: "1"
+      FORCE_CONTAINER_REMOVAL: "0"
+      GRACE_PERIOD_SECONDS: "604800"  # 7 days
+      DRY_RUN: "0"
+      CLEAN_UP_VOLUMES: "1"
+    # profiles:
+    #   - apps
+    #   - all
+
+networks:
+  socket_proxy:
+    external: true

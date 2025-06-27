@@ -1,0 +1,28 @@
+services:
+  nzbget:
+    image: lscr.io/linuxserver/nzbget:latest
+    container_name: nzbget
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    networks:
+      - web
+    volumes:
+      - /home/blehnen/docker/appdata/nzbget:/config
+      - /mnt/jellyfin-downloads:/downloads
+      - /mnt/jellyfin-downloads/incomplete:/incomplete-downloads
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=America/Chicago
+      - PUID=1000
+      - PGID=1000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nzbget.rule=Host(`nzbget.lab1830.com`)"
+      - "traefik.http.routers.nzbget.entrypoints=websecure"
+      - "traefik.http.routers.nzbget.tls.certresolver=letsencrypt"
+      - "traefik.http.services.nzbget.loadbalancer.server.port=6789"
+
+networks:
+  web:
+    external: true

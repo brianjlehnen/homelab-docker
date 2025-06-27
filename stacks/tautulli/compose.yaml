@@ -1,0 +1,26 @@
+services:
+  tautulli:
+    image: lscr.io/linuxserver/tautulli:2.15.1
+    container_name: tautulli
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - /home/blehnen/docker/appdata/tautulli:/config
+    networks:
+      - web
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tautulli.rule=Host(`tautulli.lab1830.com`)
+      - traefik.http.routers.tautulli.entrypoints=websecure
+      - traefik.http.routers.tautulli.tls=true
+      - traefik.http.services.tautulli.loadbalancer.server.port=8181
+      - traefik.http.routers.tautulli.tls.certresolver=letsencrypt
+      - com.centurylinklabs.watchtower.enable=true
+networks:
+  web:
+    external: true

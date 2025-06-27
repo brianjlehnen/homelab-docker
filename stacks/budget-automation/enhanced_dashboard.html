@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Budget Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-left: 5px solid;
+        }
+        
+        .summary-card.budget { border-left-color: #28a745; }
+        .summary-card.spent { border-left-color: #ffc107; }
+        .summary-card.remaining { border-left-color: #17a2b8; }
+        .summary-card.alerts { border-left-color: #dc3545; }
+        
+        .summary-card .value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        
+        .summary-card .label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+            opacity: 0.7;
+        }
+        
+        .budget.value { color: #28a745; }
+        .spent.value { color: #ffc107; }
+        .remaining.value { color: #17a2b8; }
+        .alerts.value { color: #dc3545; }
+        
+        .category-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .category-item:last-child {
+            border-bottom: none;
+        }
+        
+        .category-info {
+            flex: 1;
+        }
+        
+        .category-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .category-amount {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .category-progress {
+            width: 100px;
+            margin-left: 20px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        .alert-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+        
+        .alert-danger {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        .trend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .trend-item:last-child {
+            border-bottom: none;
+        }
+        
+        .trend-category {
+            font-weight: 600;
+        }
+        
+        .trend-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            transform: scale(1.1);
+            background: #5a6fd8;
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💰 Enhanced Budget Dashboard</h1>
+        <div class="subtitle">Real-time spending analysis with trends and alerts</div>
+    </div>
+    
+    <div class="container">
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <div>Loading budget data...</div>
+        </div>
+        
+        <div id="dashboard" style="display: none;">
+            <!-- Summary Cards -->
+            <div class="summary-cards">
+                <div class="summary-card budget">
+                    <div class="value budget" id="totalBudget">$0</div>
+                    <div class="label">Monthly Budget</div>
+                </div>
+                <div class="summary-card spent">
+                    <div class="value spent" id="totalSpent">$0</div>
+                    <div class="label">Total Spent</div>
+                </div>
+                <div class="summary-card remaining">
+                    <div class="value remaining" id="totalRemaining">$0</div>
+                    <div class="label">Remaining</div>
+                </div>
+                <div class="summary-card alerts">
+                    <div class="value alerts" id="alertCount">0</div>
+                    <div class="label">Active Alerts</div>
+                </div>
+            </div>
+            
+            <!-- Main Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Spending Overview Chart -->
+                <div class="card">
+                    <h2>📊 Spending Overview</h2>
+                    <div class="chart-container">
+                        <canvas id="spendingChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Category Breakdown -->
+                <div class="card">
+                    <h2>📋 Category Breakdown</h2>
+                    <div id="categoryList"></div>
+                </div>
+                
+                <!-- Active Alerts -->
+                <div class="card">
+                    <h2>🚨 Active Alerts</h2>
+                    <div id="alertsList"></div>
+                </div>
+                
+                <!-- Spending Trends -->
+                <div class="card">
+                    <h2>📈 Spending Trends</h2>
+                    <div id="trendsList"></div>
+                </div>
+                
+                <!-- Budget Progress Chart -->
+                <div class="card">
+                    <h2>🎯 Budget Progress</h2>
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="card">
+                    <h2>⚡ Quick Stats</h2>
+                    <div id="quickStats"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="last-updated" id="lastUpdated"></div>
+    </div>
+    
+    <button class="refresh-btn" onclick="loadBudgetData()" title="Refresh Data">
+        🔄
+    </button>
+    
+    <script>
+        let spendingChart = null;
+        let progressChart = null;
+        
+        async function loadBudgetData() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('dashboard').style.display = 'none';
+                
+                const response = await fetch('/reports/latest_budget_data.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load budget data');
+                }
+                
+                const data = await response.json();
+                
+                // Check if this is test data and warn user
+                if (data.test_mode) {
+                    console.warn('⚠️ Loading test data - this may not reflect actual budget status');
+                    showTestDataWarning();
+                }
+                
+                updateDashboard(data);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading budget data:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div style="color: #dc3545;">
+                        <h3>⚠️ Unable to load budget data</h3>
+                        <p>Please check if the budget automation is running.</p>
+                        <button onclick="loadBudgetData()" style="
+                            background: white; 
+                            color: #667eea; 
+                            border: none; 
+                            padding: 10px 20px; 
+                            border-radius: 5px; 
+                            cursor: pointer;
+                            margin-top: 10px;
+                        ">Retry</button>
+                    </div>
+                `;
+            }
+        }
+        
+        function showTestDataWarning() {
+            // Create warning banner if it doesn't exist
+            if (!document.getElementById('testWarning')) {
+                const warning = document.createElement('div');
+                warning.id = 'testWarning';
+                warning.style.cssText = `
+                    background: #fff3cd;
+                    color: #856404;
+                    padding: 15px;
+                    text-align: center;
+                    font-weight: 600;
+                    border-left: 4px solid #ffc107;
+                    margin-bottom: 20px;
+                    border-radius: 5px;
+                `;
+                warning.innerHTML = '🧪 <strong>TEST DATA WARNING:</strong> This dashboard is showing test data, not live budget information.';
+                
+                const container = document.querySelector('.container');
+                container.insertBefore(warning, container.firstChild);
+            }
+        }
+        
+        function updateDashboard(data) {
+            // Update summary cards
+            document.getElementById('totalBudget').textContent = `$${data.totals.budget.toLocaleString()}`;
+            document.getElementById('totalSpent').textContent = `$${data.totals.spent.toLocaleString()}`;
+            document.getElementById('totalRemaining').textContent = `$${data.totals.remaining.toLocaleString()}`;
+            document.getElementById('alertCount').textContent = data.alerts.length;
+            
+            // Update category breakdown
+            updateCategoryList(data.metrics);
+            
+            // Update alerts
+            updateAlertsList(data.alerts);
+            
+            // Update trends
+            updateTrendsList(data.trends);
+            
+            // Update charts
+            updateSpendingChart(data.spending_data);
+            updateProgressChart(data.metrics);
+            
+            // Update quick stats
+            updateQuickStats(data);
+            
+            // Update last updated time
+            const lastUpdated = new Date(data.timestamp);
+            document.getElementById('lastUpdated').textContent = 
+                `Last updated: ${lastUpdated.toLocaleString()}`;
+        }
+        
+        function updateCategoryList(metrics) {
+            const container = document.getElementById('categoryList');
+            container.innerHTML = '';
+            
+            // Sort by percentage
+            const sortedMetrics = Object.entries(metrics).sort((a, b) => b[1].percentage - a[1].percentage);
+            
+            sortedMetrics.forEach(([category, data]) => {
+                const item = document.createElement('div');
+                item.className = 'category-item';
+                
+                const progressWidth = Math.min(data.percentage, 100);
+                const progressColor = data.percentage > 100 ? '#dc3545' : 
+                                    data.percentage > 90 ? '#ffc107' : '#28a745';
+                
+                item.innerHTML = `
+                    <div class="category-info">
+                        <div class="category-name">${category}</div>
+                        <div class="category-amount">$${data.spent.toLocaleString()} of $${data.target.toLocaleString()}</div>
+                    </div>
+                    <div class="category-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progressWidth}%; background-color: ${progressColor};"></div>
+                        </div>
+                        <div class="progress-text" style="color: ${progressColor};">${data.percentage.toFixed(0)}%</div>
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+        
+        function updateAlertsList(alerts) {
+            const container = document.getElementById('alertsList');
+            
+            if (alerts.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #28a745; padding: 20px;">✅ No active alerts</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            alerts.forEach(alert => {
+                const item = document.createElement('div');
+                item.className = `alert-item alert-${alert.severity}`;
+                
+                const icon = alert.severity === 'danger' ? '🚨' : '⚠️';
+                item.innerHTML = `${icon} ${alert.message}`;
+                
+                container.appendChild(item);
+            });
+        }
+        
+        function updateTrendsList(trends) {
+            const container = document.getElementById('trendsList');
+            
+            if (Object.keys(trends).length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #6c757d; padding: 20px;">📊 Building trend data...</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            Object.entries(trends).forEach(([category, data]) => {
+                const item = document.createElement('div');
+                item.className = 'trend-item';
+                
+                item.innerHTML = `
+                    <div class="trend-category">${category}</div>
+                    <div class="trend-indicator" style="color: ${data.trend_color};">
+                        ${data.trend}
+                        <span style="font-size: 0.8rem;">$${data.projected_total.toLocaleString()}</span>
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+        
+        function updateSpendingChart(spendingData) {
+            const ctx = document.getElementById('spendingChart').getContext('2d');
+            
+            if (spendingChart) {
+                spendingChart.destroy();
+            }
+            
+            const categories = Object.keys(spendingData);
+            const amounts = Object.values(spendingData);
+            
+            spendingChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: categories.map(cat => cat.replace(/.*\s/, '')), // Remove emoji for chart
+                    datasets: [{
+                        data: amounts,
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                            '#9966FF', '#FF9F40', '#FF6384'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateProgressChart(metrics) {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            
+            if (progressChart) {
+                progressChart.destroy();
+            }
+            
+            const categories = Object.keys(metrics);
+            const percentages = Object.values(metrics).map(m => m.percentage);
+            
+            progressChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: categories.map(cat => cat.replace(/.*\s/, '')),
+                    datasets: [{
+                        label: 'Budget Used (%)',
+                        data: percentages,
+                        backgroundColor: percentages.map(p => 
+                            p > 100 ? '#dc3545' : p > 90 ? '#ffc107' : '#28a745'
+                        ),
+                        borderColor: percentages.map(p => 
+                            p > 100 ? '#dc3545' : p > 90 ? '#ffc107' : '#28a745'
+                        ),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 120,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateQuickStats(data) {
+            const container = document.getElementById('quickStats');
+            const today = new Date();
+            const dayOfMonth = today.getDate();
+            const totalDays = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+            
+            const dailyBudget = data.totals.budget / totalDays;
+            const dailySpent = data.totals.spent / dayOfMonth;
+            const projectedSpending = dailySpent * totalDays;
+            const budgetPace = (data.totals.spent / data.totals.budget) / (dayOfMonth / totalDays);
+            
+            container.innerHTML = `
+                <div class="trend-item">
+                    <span>Daily Budget Target</span>
+                    <span>$${dailyBudget.toFixed(0)}</span>
+                </div>
+                <div class="trend-item">
+                    <span>Daily Spending Avg</span>
+                    <span>$${dailySpent.toFixed(0)}</span>
+                </div>
+                <div class="trend-item">
+                    <span>Projected Month Total</span>
+                    <span style="color: ${projectedSpending > data.totals.budget ? '#dc3545' : '#28a745'};">
+                        $${projectedSpending.toFixed(0)}
+                    </span>
+                </div>
+                <div class="trend-item">
+                    <span>Budget Pace</span>
+                    <span style="color: ${budgetPace > 1.1 ? '#dc3545' : budgetPace > 0.9 ? '#ffc107' : '#28a745'};">
+                        ${(budgetPace * 100).toFixed(0)}%
+                    </span>
+                </div>
+            `;
+        }
+        
+        // Auto-refresh every 5 minutes
+        setInterval(loadBudgetData, 5 * 60 * 1000);
+        
+        // Load initial data
+        loadBudgetData();
+    </script>
+</body>
+</html>
