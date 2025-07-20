@@ -1,7 +1,7 @@
 # File: /home/blehnen/docker/stacks/speedtest-tracker/compose.yaml
 services:
   speedtest-tracker:
-    image: lscr.io/linuxserver/speedtest-tracker:1.6.1
+    image: lscr.io/linuxserver/speedtest-tracker:latest
     container_name: speedtest-tracker
     restart: unless-stopped
     security_opt:
@@ -12,9 +12,9 @@ services:
       PGID: 1000
       APP_KEY: ${SPEEDTEST_APP_KEY}
       DB_CONNECTION: sqlite
-      SPEEDTEST_SCHEDULE: 0 */6 * * *  # Every 6 hours
-      SPEEDTEST_SERVERS:           # Auto-select best servers
-      PRUNE_RESULTS_OLDER_THAN: 90  # Keep 90 days of results
+      SPEEDTEST_SCHEDULE: 0 */6 * * * # Every 6 hours
+      SPEEDTEST_SERVERS: null # Auto-select best servers
+      PRUNE_RESULTS_OLDER_THAN: 90 # Keep 90 days of results
       DISPLAY_TIMEZONE: America/Chicago
       FORCE_HTTPS: false
     volumes:
@@ -23,14 +23,13 @@ services:
     networks:
       - web
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.speedtest.rule=Host(`speedtest.lab1830.com`)"
-      - "traefik.http.routers.speedtest.entrypoints=websecure"
-      - "traefik.http.routers.speedtest.tls=true"
-      - "traefik.http.routers.speedtest.tls.certresolver=letsencrypt"
-      - "traefik.http.services.speedtest.loadbalancer.server.port=80"
+      - traefik.enable=true
+      - traefik.http.routers.speedtest.rule=Host(`speedtest.lab1830.com`)
+      - traefik.http.routers.speedtest.entrypoints=websecure
+      - traefik.http.routers.speedtest.tls=true
+      - traefik.http.routers.speedtest.tls.certresolver=letsencrypt
+      - traefik.http.services.speedtest.loadbalancer.server.port=80
       - com.centurylinklabs.watchtower.enable=true
-
 networks:
   web:
     external: true

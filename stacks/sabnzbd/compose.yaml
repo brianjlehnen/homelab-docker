@@ -1,6 +1,6 @@
 services:
   sabnzbd:
-    image: lscr.io/linuxserver/sabnzbd:4.5.1-ls220
+    image: lscr.io/linuxserver/sabnzbd:latest
     container_name: sabnzbd
     restart: unless-stopped
     security_opt:
@@ -9,7 +9,7 @@ services:
       TZ: America/Chicago
       PUID: 1000
       PGID: 1000
-      UMASK_SET: 002
+      UMASK_SET: 2
       HOST_WHITELIST_ENTRIES: sabnzbd.lab1830.com,localhost, 127.0.0.1
     volumes:
       - /home/blehnen/docker/appdata/sabnzbd:/config
@@ -18,13 +18,12 @@ services:
     networks:
       - web
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.lab1830.com`)"
-      - "traefik.http.routers.sabnzbd.entrypoints=websecure"
-      - "traefik.http.routers.sabnzbd.tls=true"
-      - "traefik.http.services.sabnzbd.loadbalancer.server.port=8080"
-      - "traefik.http.routers.sabnzbd.tls.certresolver=letsencrypt"
-
+      - traefik.enable=true
+      - traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.lab1830.com`)
+      - traefik.http.routers.sabnzbd.entrypoints=websecure
+      - traefik.http.routers.sabnzbd.tls=true
+      - traefik.http.services.sabnzbd.loadbalancer.server.port=8080
+      - traefik.http.routers.sabnzbd.tls.certresolver=letsencrypt
 networks:
   web:
     external: true
