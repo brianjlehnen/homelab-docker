@@ -1,0 +1,27 @@
+services:
+  homebox:
+    image: ghcr.io/hay-kot/homebox:latest
+    container_name: homebox
+    environment:
+      - HBOX_LOG_LEVEL=info
+      - HBOX_LOG_FORMAT=text
+      - HBOX_WEB_MAX_UPLOAD_SIZE=10
+    volumes:
+      - /home/blehnen/docker/appdata/homebox:/data/
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.homebox.rule=Host(`homebox.lab1830.com`)
+      - traefik.http.routers.homebox.entrypoints=websecure
+      - traefik.http.routers.homebox.tls=true
+      - traefik.http.routers.homebox.tls.certresolver=letsencrypt
+      - traefik.http.services.homebox.loadbalancer.server.port=7745
+      - com.centurylinklabs.watchtower.enable=true
+    networks:
+      - web
+
+networks:
+  web:
+    external: true

@@ -1,0 +1,42 @@
+# /home/blehnen/docker/stacks/uptime-kuma/compose.yaml
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    restart: unless-stopped
+    volumes:
+      - uptime-kuma-data:/app/data
+    environment:
+      - TZ=America/Chicago
+      - PUID=1000
+      - PGID=1000
+    dns:
+      - 192.168.4.201  # AdGuard Home
+      - 192.168.4.254  # Pi-hole backup
+      - 1.1.1.1        # Cloudflare fallback
+    networks:
+      - web
+      - socket_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.uptime-kuma.rule=Host(`kuma.lab1830.com`)"
+      - "traefik.http.routers.uptime-kuma-status.rule=Host(`status.lab1830.com`)"
+      - "traefik.http.routers.uptime-kuma.entrypoints=websecure"
+      - "traefik.http.routers.uptime-kuma-status.entrypoints=websecure"
+      - "traefik.http.routers.uptime-kuma.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.uptime-kuma-status.tls.certresolver=letsencrypt"
+      - "traefik.http.services.uptime-kuma.loadbalancer.server.port=3001"
+      # Fixed path rewrite for status page
+      - "traefik.http.routers.uptime-kuma-status.middlewares=status-redirect"
+      - "traefik.http.middlewares.status-redirect.redirectregex.regex=^https://status.lab1830.com/?$$"
+      - "traefik.http.middlewares.status-redirect.redirectregex.replacement=https://status.lab1830.com/status/homelab"
+      - "com.centurylinklabs.watchtower.enable=true"
+
+volumes:
+  uptime-kuma-data:
+
+networks:
+  web:
+    external: true
+  socket_proxy:
+    external: true
