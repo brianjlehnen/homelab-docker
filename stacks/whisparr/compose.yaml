@@ -1,0 +1,30 @@
+services:
+  whisparr:
+    container_name: whisparr
+    image: ghcr.io/hotio/whisparr
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    networks:
+      - web
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - UMASK=002
+      - TZ=America/Chicago
+    volumes:
+      - /home/blehnen/docker/appdata/whisparr:/config
+      - /mnt/jellyfin:/data/media
+      - /mnt/jellyfin-downloads:/data/downloads
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whisparr.rule=Host(`whisparr.lab1830.com`)"
+      - "traefik.http.routers.whisparr.entrypoints=websecure"
+      - "traefik.http.routers.whisparr.tls.certresolver=letsencrypt"
+      - "traefik.http.services.whisparr.loadbalancer.server.port=6969"
+      - com.centurylinklabs.watchtower.enable=true
+
+networks:
+  web:
+    external: true

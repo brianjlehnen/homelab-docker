@@ -1,0 +1,34 @@
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+api:
+  dashboard: true
+  insecure: false
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: web
+  file:
+    directory: /etc/traefik/config/dynamic
+    watch: true
+
+log:
+  level: DEBUG
+
+accessLog: true
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: blehnen@gmail.com
+      storage: /etc/traefik/config/acme.json
+      dnsChallenge:
+        provider: cloudflare
+        delayBeforeCheck: 60s
+        resolvers:
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"

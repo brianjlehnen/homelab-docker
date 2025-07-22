@@ -1,0 +1,49 @@
+services:
+  plex:
+    image: plexinc/pms-docker:1.41.7.9823-59f304c16
+    container_name: plex
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    devices:
+      - /dev/dri:/dev/dri
+    ports:
+      - "32400:32400/tcp"
+      - "3005:3005/tcp"
+      - "8324:8324/tcp"
+      - "32469:32469/tcp"
+      - "1900:1900/udp"
+      - "32410:32410/udp"
+      - "32412:32412/udp"
+      - "32413:32413/udp"
+      - "32414:32414/udp"
+    volumes:
+      - /home/blehnen/docker/appdata/plex:/config
+      - /mnt/media:/mnt/media
+      - /dev/shm:/data/transcode
+    environment:
+      TZ: "America/Chicago"
+      HOSTNAME: "titan"
+      PLEX_UID: "1000"
+      PLEX_GID: "1000"
+      ADVERTISE_IP: "http://192.168.4.156:32400/"
+      ALLOWED_NETWORKS: "192.168.1.0/24,10.0.0.0/8"
+    secrets:
+      - plex_claim
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.plex.rule=Host(`plex.lab1830.com`)"
+      - "traefik.http.routers.plex.entrypoints=websecure"
+      - "traefik.http.routers.plex.tls=true"
+      - "traefik.http.services.plex.loadbalancer.server.port=32400"
+      - "traefik.http.routers.plex.tls.certresolver=letsencrypt"
+
+networks:
+  web:
+    external: true
+
+secrets:
+  plex_claim:
+    file: /home/blehnen/docker/secrets/plex_claim

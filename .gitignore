@@ -1,0 +1,27 @@
+# Environment files with secrets
+.env
+*.env
+
+# Certificate files
+*/certs/*.crt
+*/certs/*.key
+*/certs/*.pem
+
+# ACME/Let's Encrypt files
+**/acme.json
+
+# Backup directories
+*/backup/
+backup/
+
+# Log files
+*/logs/
+*.log
+
+# Data directories
+*/data/
+appdata/
+
+# Temporary files
+*.tmp
+*.temp

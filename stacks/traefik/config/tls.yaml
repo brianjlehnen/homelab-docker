@@ -1,0 +1,5 @@
+tls:
+  certificates:
+    - certFile: /etc/traefik/dynamic/certs/lab1830.crt
+      keyFile: /etc/traefik/dynamic/certs/lab1830.key
+

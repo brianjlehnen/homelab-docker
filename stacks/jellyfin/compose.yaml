@@ -1,0 +1,33 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    networks:
+      - web
+    volumes:
+      - /home/blehnen/docker/appdata/jellyfin:/config
+      - /home/blehnen/docker/appdata/jellyfin/cache:/cache
+      - /mnt/jellyfin:/media:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=America/Chicago
+      - PUID=1000
+      - PGID=1000
+      - JELLYFIN_PublishedServerUrl=https://jellyfin.lab1830.home
+    # Optional: Hardware acceleration (uncomment if you have compatible hardware)
+    # devices:
+    #   - /dev/dri:/dev/dri # Intel QuickSync
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyfin.rule=Host(`jellyfin.lab1830.com`)"
+      - "traefik.http.routers.jellyfin.entrypoints=websecure"
+      - "traefik.http.routers.jellyfin.tls.certresolver=letsencrypt"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+      - com.centurylinklabs.watchtower.enable=true
+
+networks:
+  web:
+    external: true

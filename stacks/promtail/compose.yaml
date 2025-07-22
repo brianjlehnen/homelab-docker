@@ -1,0 +1,35 @@
+services:
+  promtail:
+    image: grafana/promtail:3.5.1
+    container_name: promtail
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    networks:
+      - web
+    volumes:
+      - /home/blehnen/docker/appdata/promtail/promtail.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/log:/var/log:ro
+      - /etc/localtime:/etc/localtime:ro
+      - promtail-data:/tmp/promtail
+    environment:
+      TZ: America/Chicago
+      PUID: 1000
+      PGID: 1000
+    command: -config.file=/etc/promtail/config.yml
+    ports:
+      - "9080:9080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.promtail.rule=Host(`promtail.lab1830.com`)"
+      - "traefik.http.routers.promtail.entrypoints=websecure"
+      - "traefik.http.routers.promtail.tls=true"
+      - "traefik.http.services.promtail.loadbalancer.server.port=9080"
+
+volumes:
+  promtail-data:
+
+networks:
+  web:
+    external: true

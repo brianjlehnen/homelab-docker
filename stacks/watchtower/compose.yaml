@@ -1,0 +1,42 @@
+services:
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: unless-stopped
+    environment:
+      # Scheduling - check for updates daily at 3 AM
+      - WATCHTOWER_SCHEDULE=0 0 3 * * *
+      
+      # Cleanup old images after update
+      - WATCHTOWER_CLEANUP=true
+      
+      # Only monitor containers with specific label
+      - WATCHTOWER_LABEL_ENABLE=true
+      
+      # Timezone
+      - TZ=America/Chicago
+      
+      # Rolling restart (update one container at a time)
+      - WATCHTOWER_ROLLING_RESTART=true
+      
+      # Debug logging
+      - WATCHTOWER_DEBUG=false
+      
+      # Include stopped containers
+      - WATCHTOWER_INCLUDE_STOPPED=true
+      
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /home/blehnen/docker/appdata/watchtower:/config
+    
+    networks:
+      - web
+    
+    labels:
+      # Don't update watchtower itself automatically
+      - com.centurylinklabs.watchtower.enable=false
+      - com.docker.compose.project=watchtower
+
+networks:
+  web:
+    external: true

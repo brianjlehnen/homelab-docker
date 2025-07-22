@@ -1,0 +1,26 @@
+services:
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:v1.34.0-ls141
+    container_name: overseerr
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: America/Chicago
+    volumes:
+      - /home/blehnen/docker/appdata/overseerr:/config
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.overseerr.rule=Host(`overseerr.lab1830.com`)"
+      - "traefik.http.routers.overseerr.entrypoints=websecure"
+      - "traefik.http.routers.overseerr.tls=true"
+      - "traefik.http.services.overseerr.loadbalancer.server.port=5055"
+      - "traefik.http.routers.overseerr.tls.certresolver=letsencrypt"
+
+networks:
+  web:
+    external: true
