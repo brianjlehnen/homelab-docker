@@ -27,7 +27,7 @@ services:
       PLEX_UID: "1000"
       PLEX_GID: "1000"
       ADVERTISE_IP: "http://192.168.4.156:32400/"
-      ALLOWED_NETWORKS: "192.168.1.0/24,10.0.0.0/8"
+      ALLOWED_NETWORKS: "192.168.0.0/24,10.0.0.0/8"
     secrets:
       - plex_claim
     networks:
