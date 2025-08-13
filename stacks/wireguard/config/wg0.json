@@ -1,0 +1,20 @@
+{
+  "server": {
+    "privateKey": "wIKYvZE+dHh+ZtuHlXDkfWQha734R2Xczo+6sIo1gXg=",
+    "publicKey": "blv69/WTDp5RN23tSj9DbpSjY0Wa3BHJ6X3YspgW00I=",
+    "address": "10.8.0.1"
+  },
+  "clients": {
+    "1ef96283-eea8-43ee-8d11-33c2672eecca": {
+      "id": "1ef96283-eea8-43ee-8d11-33c2672eecca",
+      "name": "lightsail-vpn-client",
+      "address": "10.8.0.2",
+      "privateKey": "cPdT5viAnShIXQS4eHpsA6OQ1KJl7n4tP5RcdGQYiHc=",
+      "publicKey": "lLbMB9qVhZZ2bpvwNRdZBDRLcUtBnGJz6trbuaAef3c=",
+      "preSharedKey": "FH9INUD8WXk1JwxlFxDeYGnwDFrxtRrEh+/UPcNclts=",
+      "createdAt": "2025-08-03T01:37:40.077Z",
+      "updatedAt": "2025-08-03T01:37:40.077Z",
+      "enabled": true
+    }
+  }
+}
