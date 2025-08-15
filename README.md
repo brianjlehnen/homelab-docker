@@ -1,49 +1,53 @@
-# Lab1830 Docker Homelab
+### homelab-docker/README.md
 
-Docker Compose configurations for Lab1830 homelab infrastructure.
+### Lab1830 Docker Services
 
-## Services
+Docker-based services for media management and personal utilities in a homelab environment.
 
-### Media Stack
-- **Plex**: Media server
-- **Radarr/Sonarr/Whisparr**: Media automation
-- **Overseerr**: Media requests
-- **Jellyfin**: Alternative media server
-- **Tautulli**: Plex analytics
+### Overview
 
-### Download Clients
-- **SABnzbd**: Primary usenet downloader
-- **NZBGet**: Alternative usenet client
-- **Prowlarr**: Indexer management
+Collection of Docker Compose stacks for stable, high-performance services. Designed for services requiring direct host access, media processing, and external connectivity.
 
-### Infrastructure
-- **Traefik**: Reverse proxy with automatic HTTPS
-- **Portainer**: Container management
-- **Dockge**: Docker Compose stack management
-- **Watchtower**: Automated updates
-- **Socket Proxy**: Secure Docker API access
+### Architecture
 
-### Monitoring & Utilities
-- **Promtail**: Log shipping to Kubernetes Loki
-- **Speedtest Tracker**: Network monitoring
-- **Mealie**: Recipe management
-- **Smokeping**: Network latency monitoring
+- **Platform:** Docker + Docker Compose
+- **Networking:** Traefik reverse proxy
+- **Storage:** NFS mounts to Synology NAS
+- **Management:** Individual compose stacks
 
-### Custom Applications
-- **Budget Automation**: Custom Python financial automation
+### Repository Structure
+```bash
+docker
+├── appdata
+├── secrets
+└── stacks
+    └── application
+        └── compose.yaml
+```
+### Services
 
-## Deployment
+**Media Stack:**
+- Plex media server
+- ARR stack (content automation)
+- NZBGet, SABnzbd (download clients)
+- Overseerr (request management)
 
-Each service is in its own directory with a `compose.yaml` file.
+**Infrastructure:**
+- Traefik (reverse proxy)
+- Uptime Kuma (monitoring)
+- Dockge (management)
 
-### Environment Variables
-Copy `.env.example` to `.env` in each service directory and configure as needed.
+**Utilities:**
+- Smokeping
+- Speedtest
 
-### Traefik Certificates
-Place SSL certificates in `traefik/certs/` (not included in repo).
+### Technology Stack
 
-## Directory Structure on Host
-/home/blehnen/docker/
-├── stacks/          # This repository
-└── appdata/         # Persistent data (not in Git)
+- Docker + Docker Compose
+- Traefik
+- Cloudflare tunnel
+- NFS storage
 
+### Usage
+
+Each service stack is independently deployable via Docker Compose. Services are routed through Traefik.
