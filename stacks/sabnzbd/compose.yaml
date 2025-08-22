@@ -13,8 +13,7 @@ services:
       HOST_WHITELIST_ENTRIES: sabnzbd.lab1830.com,localhost, 127.0.0.1
     volumes:
       - /home/blehnen/docker/appdata/sabnzbd:/config
-      - /mnt/downloads/complete:/downloads
-      - /mnt/downloads/incomplete:/incomplete-downloads
+      - /mnt/media:/data
     networks:
       - web
     labels:
