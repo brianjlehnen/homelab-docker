@@ -1,6 +1,6 @@
 services:
   sabnzbd:
-    image: lscr.io/linuxserver/sabnzbd:latest
+    image: lscr.io/linuxserver/sabnzbd:4.5.1-ls220
     container_name: sabnzbd
     restart: unless-stopped
     security_opt:
@@ -9,30 +9,15 @@ services:
       TZ: America/Chicago
       PUID: 1000
       PGID: 1000
-<<<<<<< HEAD
       UMASK_SET: 002
       HOST_WHITELIST_ENTRIES: sabnzbd.lab1830.com,localhost, 127.0.0.1
-=======
-      UMASK_SET: 2
-      HOST_WHITELIST_ENTRIES: sabnzbd.lab1830.com,localhost,127.0.0.1
->>>>>>> c163b87 (latest updates)
     volumes:
-      # Explicit bind mount syntax (more reliable than shorthand)
-      - type: bind
-        source: /home/blehnen/docker/appdata/sabnzbd
-        target: /config
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /mnt/media
-        target: /data
-        read_only: false
-        bind:
-          create_host_path: false
+      - /home/blehnen/docker/appdata/sabnzbd:/config
+      - /mnt/downloads/complete:/downloads
+      - /mnt/downloads/incomplete:/incomplete-downloads
     networks:
       - web
     labels:
-<<<<<<< HEAD
       - "traefik.enable=true"
       - "traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.lab1830.com`)"
       - "traefik.http.routers.sabnzbd.entrypoints=websecure"
@@ -43,26 +28,3 @@ services:
 networks:
   web:
     external: true
-=======
-      - traefik.enable=true
-      - traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.lab1830.com`)
-      - traefik.http.routers.sabnzbd.entrypoints=websecure
-      - traefik.http.routers.sabnzbd.tls=true
-      - traefik.http.services.sabnzbd.loadbalancer.server.port=8080
-      - traefik.http.routers.sabnzbd.tls.certresolver=letsencrypt
-      # Monitoring labels
-      - homelab.mount.type=nfs
-      - homelab.mount.source=192.168.4.159:/volume1/Media
-    # Simplified healthcheck - just check if service responds
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api?mode=version"]
-      interval: 60s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
-networks:
-  web:
-    external: true
-    name: web
->>>>>>> c163b87 (latest updates)

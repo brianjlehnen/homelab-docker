@@ -8,42 +8,20 @@ services:
     networks:
       - web
     volumes:
-      # Explicit bind mount syntax prevents Docker volume conflicts
-      - type: bind
-        source: /home/blehnen/docker/appdata/sonarr
-        target: /config
-        bind:
-          create_host_path: true
-      - type: bind
-        source: /mnt/media
-        target: /data
-        read_only: false
-        bind:
-          create_host_path: false  # Fail if NFS mount missing
-      - type: bind
-        source: /etc/localtime
-        target: /etc/localtime
-        read_only: true
+      - /home/blehnen/docker/appdata/sonarr:/config
+      - /mnt/downloads/complete:/downloads
+      - /mnt/media/TV:/TV
+      - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=America/Chicago
       - PUID=1000
       - PGID=1000
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.sonarr.rule=Host(`sonarr.lab1830.com`)
-      - traefik.http.routers.sonarr.entrypoints=websecure
-      - traefik.http.routers.sonarr.tls.certresolver=letsencrypt
-      - traefik.http.services.sonarr.loadbalancer.server.port=8989
-      # Monitoring labels
-      - homelab.mount.type=nfs
-      - homelab.mount.source=192.168.4.159:/volume1/Media
-    # Simple healthcheck
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8989/ping"]
-      interval: 60s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.lab1830.com`)"
+      - "traefik.http.routers.sonarr.entrypoints=websecure"
+      - "traefik.http.routers.sonarr.tls.certresolver=letsencrypt"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
 
 networks:
   web:
