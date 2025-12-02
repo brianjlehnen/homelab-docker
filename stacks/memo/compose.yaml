@@ -1,0 +1,22 @@
+services:
+  memos:
+    image: neosmemo/memos:stable
+    container_name: memos
+    restart: unless-stopped
+    volumes:
+      - ./data:/var/opt/memos
+    environment:
+      - TZ=America/Chicago
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.memos.rule=Host(`memos.lab1830.com`)"
+      - "traefik.http.routers.memos.entrypoints=websecure"
+      - "traefik.http.routers.memos.tls=true"
+      - "traefik.http.services.memos.loadbalancer.server.port=5230"
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
