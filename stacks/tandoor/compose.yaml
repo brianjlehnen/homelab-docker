@@ -1,0 +1,54 @@
+services:
+  tandoor:
+    image: ghcr.io/tandoorrecipes/recipes:latest
+    container_name: tandoor
+    restart: unless-stopped
+    depends_on:
+      - tandoor-db
+    environment:
+      - TZ=America/Chicago
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_ENGINE=django.db.backends.postgresql
+      - POSTGRES_HOST=tandoor-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=tandoor
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=tandoor
+      - ENABLE_SIGNUP=0
+      - ALLOWED_HOSTS=*
+      - CSRF_TRUSTED_ORIGINS=https://tandoor.lab1830.com
+    volumes:
+      - /home/blehnen/docker/appdata/tandoor/staticfiles:/opt/recipes/staticfiles
+      - /home/blehnen/docker/appdata/tandoor/mediafiles:/opt/recipes/mediafiles
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tandoor.rule=Host(`tandoor.lab1830.com`)"
+      - "traefik.http.routers.tandoor.entrypoints=websecure"
+      - "traefik.http.routers.tandoor.tls.certresolver=letsencrypt"
+      - "traefik.http.services.tandoor.loadbalancer.server.port=80"
+      - "traefik.http.routers.tandoor-insecure.rule=Host(`tandoor.lab1830.com`)"
+      - "traefik.http.routers.tandoor-insecure.entrypoints=web"
+      - "traefik.http.routers.tandoor-insecure.middlewares=redirect-to-https"
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - web
+      - tandoor-internal
+
+  tandoor-db:
+    image: postgres:15-alpine
+    container_name: tandoor-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=tandoor
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=tandoor
+    volumes:
+      - /home/blehnen/docker/appdata/tandoor/db:/var/lib/postgresql/data
+    networks:
+      - tandoor-internal
+
+networks:
+  web:
+    external: true
+  tandoor-internal:
+    driver: bridge

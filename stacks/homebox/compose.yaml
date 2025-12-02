@@ -1,6 +1,6 @@
 services:
   homebox:
-    image: ghcr.io/hay-kot/homebox:latest
+    image: ghcr.io/sysadminsmedia/homebox:latest
     container_name: homebox
     environment:
       - HBOX_LOG_LEVEL=info
@@ -21,7 +21,6 @@ services:
       - com.centurylinklabs.watchtower.enable=true
     networks:
       - web
-
 networks:
   web:
     external: true

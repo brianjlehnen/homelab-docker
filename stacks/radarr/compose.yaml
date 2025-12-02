@@ -8,19 +8,47 @@ services:
     networks:
       - web
     volumes:
-      - /home/blehnen/docker/appdata/radarr:/config
-      - /mnt/media:/data
-      - /etc/localtime:/etc/localtime:ro
+      - type: bind
+        source: /home/blehnen/docker/appdata/radarr
+        target: /config
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /mnt/media
+        target: /data
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
     environment:
-      TZ: America/Chicago
-      PUID: 1000
-      PGID: 1000
+      - TZ=America/Chicago
+      - PUID=1000
+      - PGID=1000
     labels:
+<<<<<<< HEAD
       - "traefik.enable=true"
       - "traefik.http.routers.radarr.rule=Host(`radarr.lab1830.com)"
       - "traefik.http.routers.radarr.entrypoints=websecure"
       - "traefik.http.routers.radarr.tls.certresolver=letsencrypt"
       - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+=======
+      - traefik.enable=true
+      - traefik.http.routers.radarr.rule=Host(`radarr.lab1830.com`)
+      - traefik.http.routers.radarr.entrypoints=websecure
+      - traefik.http.routers.radarr.tls.certresolver=letsencrypt
+      - traefik.http.services.radarr.loadbalancer.server.port=7878
+      # Monitoring labels
+      - homelab.mount.type=nfs
+      - homelab.mount.source=192.168.4.159:/volume1/Media
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7878/ping"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+>>>>>>> c163b87 (latest updates)
 
 networks:
   web:
